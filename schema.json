@@ -5,7 +5,7 @@
     "name": "bb-component-SuperFieldDatetime",
     "friendlyName": "Super Field - Datetime",
     "description": "A Datetime Input Field component for Budibase",
-    "icon": "Text",
+    "icon": "Calendar",
     "settings": [
       {
         "type": "field/datetime",
