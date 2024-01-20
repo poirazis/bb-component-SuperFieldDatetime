@@ -21,14 +21,21 @@
       {
         "type": "text",
         "label": "Placeholder",
-        "key": "placeholder",
-        "placeholder": "Choose an option"
+        "key": "placeholder"
       },
       {
         "type": "text",
         "label": "Default value",
         "key": "defaultValue",
         "supportsConditions": false
+      },
+      {
+        "type": "text",
+        "label": "Formatted value",
+        "key": "template",
+        "placeholder" : "{{ Value }}",
+        "supportsConditions": false,
+        "nested" : true
       },
       {
         "type": "text",
@@ -46,27 +53,10 @@
         "key": "onChange",
         "context": [
           {
-            "label": "Field Value",
+            "label": "Value",
             "key": "value"
           }
         ]
-      },
-      {
-        "type": "boolean",
-        "label": "Disabled",
-        "key": "disabled",
-        "defaultValue": false
-      },
-      {
-        "type": "boolean",
-        "label": "Read only",
-        "key": "readonly",
-        "defaultValue": false,
-        "dependsOn": {
-          "setting": "disabled",
-          "value": true,
-          "invert": true
-        }
       },
       {
         "type": "select",
@@ -88,6 +78,46 @@
             "value": "switch"
           }
         ]
+      },
+      {
+        "type": "boolean",
+        "label": "Disabled",
+        "key": "disabled",
+        "defaultValue": false
+      },
+      {
+        "type": "boolean",
+        "label": "Read only",
+        "key": "readonly",
+        "defaultValue": false,
+        "dependsOn": {
+          "setting": "disabled",
+          "value": true,
+          "invert": true
+        }
+      },
+      {
+        "type" : "boolean",
+        "key"  : "showIcon",
+        "label": "Add Inline Icon"
+      },
+      {
+        "type" : "icon",
+        "key"  : "icon",
+        "label": "Icon",
+        "resetOn" : "showIcon",
+        "dependsOn" : "showIcon"
+      },
+      {
+        "type" : "boolean",
+        "key"  : "customButtons",
+        "label": "Add Buttons"
+      },
+      {
+        "type" : "buttonConfiguration",
+        "key"  : "buttons",
+        "nested" : true,
+        "dependsOn" : "customButtons"
       },
       {
         "tag" : "style",
