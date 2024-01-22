@@ -99,7 +99,6 @@
       <label for="superCell"
         class="superlabel"
         style:flex-direction={labelPos == "left" ? "column" : "row"}
-
       >
         {label} 
         {#if fieldState.error}
@@ -143,6 +142,7 @@
     </div>
   </div>
 </Block>
+
 <style>
   .superField {
     display: flex;
