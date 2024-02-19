@@ -1,6 +1,6 @@
 <script>
   import { getContext , onDestroy} from "svelte";
-  import CellDatetime from "../../bb_super_components_shared/src/lib/SuperCell/cells/CellDatetime.svelte";
+  import CellDatetime from "../../bb_super_components_shared/src/lib/SuperTableCells/CellDatetime.svelte";
 
   const { styleable, Block, BlockComponent, Provider } = getContext("sdk");
   const component = getContext("component");
