@@ -1,6 +1,7 @@
 <script>
-  import { getContext , onDestroy} from "svelte";
+  import { getContext, onDestroy } from "svelte";
   import CellDatetime from "../../bb_super_components_shared/src/lib/SuperTableCells/CellDatetime.svelte";
+  import "../../bb_super_components_shared/src/lib/SuperFieldsCommon.css";
 
   const { styleable, Block, BlockComponent, Provider } = getContext("sdk");
   const component = getContext("component");
@@ -12,31 +13,30 @@
   const formApi = formContext?.formApi;
 
   export let field;
-  export let controlType
-  
-  export let customButtons
+  export let controlType;
+
+  export let customButtons;
   export let buttons = [];
   export let buttonsQuiet;
 
   export let label;
   export let span = 6;
-  export let placeholder
-  export let defaultValue
-  export let disabled
-  export let readonly
-  export let validation
-  export let template
+  export let placeholder;
+  export let defaultValue;
+  export let disabled;
+  export let readonly;
+  export let validation;
+  export let template;
 
-  export let icon
+  export let icon;
 
   let formField;
   let formStep;
   let fieldState;
   let fieldApi;
-  let fieldSchema
+  let fieldSchema;
   let value;
-  let cellState
-  
+  let cellState;
 
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
 
@@ -48,7 +48,7 @@
     readonly,
     validation,
     formStep
-  )
+  );
 
   $: unsubscribe = formField?.subscribe((value) => {
     fieldState = value?.fieldState;
@@ -56,19 +56,19 @@
     fieldSchema = value?.fieldSchema;
   });
 
-  $: value = fieldState?.value ? fieldState.value : defaultValue
+  $: value = fieldState?.value ? fieldState.value : defaultValue;
 
-  $: cellOptions = { 
-      placeholder, 
-      defaultValue,
-      disabled,
-      template,
-      padding: "0.5rem",
-      readonly: readonly || disabled,
-      icon,
-      error: fieldState.error,
-      role: "formInput", 
-    }
+  $: cellOptions = {
+    placeholder,
+    defaultValue,
+    disabled,
+    template,
+    padding: "0.5rem",
+    readonly: readonly || disabled,
+    icon,
+    error: fieldState.error,
+    role: "formInput",
+  };
 
   $: $component.styles = {
     ...$component.styles,
@@ -77,132 +77,60 @@
       "flex-direction": labelPos == "left" ? "row" : "column",
       gap: labelPos == "left" ? "0.85rem" : "0rem",
       "grid-column": labelPos ? "span " + span : null,
-      "--label-width":
-        labelPos == "left" ? labelWidth : "auto",
+      "--label-width": labelPos == "left" ? labelWidth : "auto",
     },
   };
-  
+
   onDestroy(() => {
-    fieldApi?.deregister()
-    unsubscribe?.()
-  })
+    fieldApi?.deregister();
+    unsubscribe?.();
+  });
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <Block>
-  <div
-    class="superField"
-    use:styleable={$component.styles}  
-  >
+  <div class="superField" use:styleable={$component.styles}>
     {#if label}
-      <label for="superCell"
-        class="superlabel"
-        style:flex-direction={labelPos == "left" ? "column" : "row"}
-      >
-        {label} 
+      <label for="superCell" class="superlabel" class:left={labelPos == "left"}>
+        {label}
         {#if fieldState.error}
-          <div class="error">
+          <div class="error" class:left={labelPos == "left"}>
             <span>{fieldState.error}</span>
           </div>
         {/if}
       </label>
     {/if}
-    
+
     <div class="inline-cells">
       <CellDatetime
         bind:cellState
         {cellOptions}
-        value = {fieldState.value}
+        value={fieldState.value}
         {fieldSchema}
         on:change={(e) => fieldApi?.setValue(e.detail)}
         on:blur={cellState.lostFocus}
       />
 
       {#if customButtons && buttons?.length}
-      <div
-        class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
-        class:spectrum-ActionGroup--quiet={buttonsQuiet}
-      >
-        <Provider data={ {value}} >
-          {#each buttons as { text, onClick }}
-            <BlockComponent
-              type = "plugin/bb-component-SuperButton"
-              props = {{
-                size: "M",
-                text,
-                onClick
-              }}>
-              </BlockComponent>
+        <div
+          class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
+          class:spectrum-ActionGroup--quiet={buttonsQuiet}
+        >
+          <Provider data={{ value }}>
+            {#each buttons as { text, onClick }}
+              <BlockComponent
+                type="plugin/bb-component-SuperButton"
+                props={{
+                  size: "M",
+                  text,
+                  onClick,
+                }}
+              ></BlockComponent>
             {/each}
-        </Provider>
-      </div>
-    {/if}
-
+          </Provider>
+        </div>
+      {/if}
     </div>
   </div>
 </Block>
-
-<style>
-  .superField {
-    display: flex;
-    align-items: stretch;
-    justify-content: stretch;
-    min-width: 0;
-  }
-
-  .superField:focus {
-    outline: none;
-  }
-  .superlabel {
-    display: flex;
-    align-items: flex-start;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-width: var(--label-width);
-    max-width: var(--label-width);
-    font-size: 12px;
-    line-height: 1.75rem;
-    font-weight: 400;
-    color: var(--spectrum-global-color-gray-700);
-  }
-
-  .inline-cells {
-    flex: 1;
-    display: flex;
-    justify-items: stretch;
-    height: 2rem;
-  }
-  .warning {
-    color: var(--spectrum-global-color-red-500);
-    border-color: var(--spectrum-global-color-red-500);
-  }
-
-  .spectrum-ActionButton--quiet.warning {
-    color: var(--spectrum-global-color-red-500);
-    border: none;
-  }
-
-  .warning:hover {
-    color: #000;
-    background-color: var(--spectrum-global-color-red-500);
-  }
-  .cta {
-    color: #fff;
-    background-color: var(--primaryColor);
-  }
-
-  .disabled {
-    color: var(--spectrum-global-color-gray-600);
-    background-color: var(--spectrum-global-color-gray-200);
-  }
-
-  .superlabel.bound {
-    gap: 0.5rem;
-  }
-</style>
-
-
-
-
