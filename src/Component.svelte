@@ -1,19 +1,24 @@
 <script>
   import { getContext, onDestroy } from "svelte";
   import CellDatetime from "../../bb_super_components_shared/src/lib/SuperTableCells/CellDatetime.svelte";
+  import SuperButton from "../../bb_super_components_shared/src/lib/SuperButton/SuperButton.svelte";
   import "../../bb_super_components_shared/src/lib/SuperFieldsCommon.css";
 
-  const { styleable, Block, BlockComponent, Provider } = getContext("sdk");
+  const { styleable, enrichButtonActions } = getContext("sdk");
   const component = getContext("component");
+  const allContext = getContext("context");
 
   const formContext = getContext("form");
   const formStepContext = getContext("form-step");
-  const labelPos = getContext("field-group");
+  const groupLabelPosition = getContext("field-group");
   const labelWidth = getContext("field-group-label-width");
+  const groupColumns = getContext("field-group-columns");
+  const groupDisabled = getContext("field-group-disabled");
   const formApi = formContext?.formApi;
 
   export let field;
   export let controlType;
+  export let role = "formInpur";
 
   export let customButtons;
   export let buttons = [];
@@ -29,6 +34,9 @@
   export let template;
 
   export let icon;
+  export let labelPosition = "fieldGroup";
+  export let showDirty;
+  export let autofocus;
 
   let formField;
   let formStep;
@@ -39,6 +47,10 @@
   let cellState;
 
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
+  $: labelPos =
+    groupLabelPosition && labelPosition == "fieldGroup"
+      ? groupLabelPosition
+      : labelPosition;
 
   $: formField = formApi?.registerField(
     field,
@@ -67,7 +79,8 @@
     readonly: readonly || disabled,
     icon,
     error: fieldState.error,
-    role: "formInput",
+    role,
+    showDirty,
   };
 
   $: $component.styles = {
@@ -75,9 +88,11 @@
     normal: {
       ...$component.styles.normal,
       "flex-direction": labelPos == "left" ? "row" : "column",
-      gap: labelPos == "left" ? "0.85rem" : "0rem",
-      "grid-column": labelPos ? "span " + span : null,
-      "--label-width": labelPos == "left" ? labelWidth : "auto",
+      "align-items": "stretch",
+      gap: labelPos == "left" ? "0.5rem" : "0rem",
+      "grid-column": span < 7 ? "span " + span : "span " + groupColumns * 6,
+      "--label-width":
+        labelPos == "left" ? (labelWidth ? labelWidth : "6rem") : "auto",
     },
   };
 
@@ -89,48 +104,46 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<Block>
-  <div class="superField" use:styleable={$component.styles}>
-    {#if label}
-      <label for="superCell" class="superlabel" class:left={labelPos == "left"}>
-        {label}
-        {#if fieldState.error}
-          <div class="error" class:left={labelPos == "left"}>
-            <span>{fieldState.error}</span>
-          </div>
-        {/if}
-      </label>
-    {/if}
-
-    <div class="inline-cells">
-      <CellDatetime
-        bind:cellState
-        {cellOptions}
-        value={fieldState.value}
-        {fieldSchema}
-        on:change={(e) => fieldApi?.setValue(e.detail)}
-        on:blur={cellState.lostFocus}
-      />
-
-      {#if customButtons && buttons?.length}
-        <div
-          class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
-          class:spectrum-ActionGroup--quiet={buttonsQuiet}
-        >
-          <Provider data={{ value }}>
-            {#each buttons as { text, onClick }}
-              <BlockComponent
-                type="plugin/bb-component-SuperButton"
-                props={{
-                  size: "M",
-                  text,
-                  onClick,
-                }}
-              ></BlockComponent>
-            {/each}
-          </Provider>
+<div class="superField" use:styleable={$component.styles}>
+  {#if label && labelPos}
+    <label for="superCell" class="superlabel" class:left={labelPos == "left"}>
+      {label}
+      {#if fieldState.error}
+        <div class="error" class:left={labelPos == "left"}>
+          <span>{fieldState.error}</span>
         </div>
       {/if}
-    </div>
+    </label>
+  {/if}
+
+  <div class="inline-cells">
+    <CellDatetime
+      bind:cellState
+      {cellOptions}
+      value={fieldState.value}
+      {fieldSchema}
+      {autofocus}
+      on:change={(e) => fieldApi?.setValue(e.detail)}
+      on:blur={cellState.lostFocus}
+    />
+
+    {#if customButtons && buttons?.length}
+      <div
+        class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
+        class:spectrum-ActionGroup--quiet={buttonsQuiet}
+      >
+        {#each buttons as { text, onClick, quiet, disabled, type }}
+          <SuperButton
+            quiet={buttonsQuiet || quiet}
+            {disabled}
+            size="M"
+            {text}
+            onClick={enrichButtonActions(onClick, $allContext)}
+            emphasized
+            selected={type == "cta"}
+          />
+        {/each}
+      </div>
+    {/if}
   </div>
-</Block>
+</div>

@@ -6,6 +6,7 @@
     "friendlyName": "Super Field - Datetime",
     "description": "A Datetime Input Field component for Budibase",
     "icon": "Calendar",
+    "requiredAncestors": ["form"],
     "settings": [
       {
         "type": "field/datetime",
@@ -33,9 +34,9 @@
         "type": "text",
         "label": "Formatted value",
         "key": "template",
-        "placeholder" : "{{ Value }}",
+        "placeholder": "{{ Value }}",
         "supportsConditions": false,
-        "nested" : true
+        "nested": true
       },
       {
         "type": "text",
@@ -70,14 +71,16 @@
             "value": "select"
           },
           {
-            "label": "Checkboxes",
-            "value": "checkbox"
-          },
-          {
-            "label": "Switches",
-            "value": "switch"
+            "label": "Expanded",
+            "value": "expanded"
           }
         ]
+      },
+      {
+        "type": "boolean",
+        "label": "Grab Focus",
+        "key": "autofocus",
+        "defaultValue": false
       },
       {
         "type": "boolean",
@@ -97,30 +100,82 @@
         }
       },
       {
-        "type" : "boolean",
-        "key"  : "showIcon",
+        "type": "boolean",
+        "key": "showIcon",
         "label": "Add Inline Icon"
       },
       {
-        "type" : "icon",
-        "key"  : "icon",
+        "type": "icon",
+        "key": "icon",
         "label": "Icon",
-        "resetOn" : "showIcon",
-        "dependsOn" : "showIcon"
+        "resetOn": "showIcon",
+        "dependsOn": "showIcon"
       },
       {
-        "type" : "boolean",
-        "key"  : "customButtons",
+        "type": "boolean",
+        "key": "customButtons",
         "label": "Add Buttons"
       },
       {
-        "type" : "buttonConfiguration",
-        "key"  : "buttons",
-        "nested" : true,
-        "dependsOn" : "customButtons"
+        "type": "buttonConfiguration",
+        "key": "buttons",
+        "nested": true,
+        "dependsOn": "customButtons"
       },
       {
-        "tag" : "style",
+        "tag": "style",
+        "type": "select",
+        "label": "Field Mode",
+        "key": "role",
+        "defaultValue": "formInput",
+        "options": [
+          {
+            "label": "Form Input",
+            "value": "formInput"
+          },
+          {
+            "label": "Inline Input",
+            "value": "inlineInput"
+          }
+        ]
+      },
+      {
+        "tag": "style",
+        "type": "select",
+        "label": "Label Position",
+        "key": "labelPosition",
+        "showInBar": true,
+        "barStyle": "buttons",
+        "defaultValue": "fieldGroup",
+        "options": [
+          {
+            "label": "Disabled",
+            "value": false,
+            "barIcon": "Cancel",
+            "barTitle": "Disabled"
+          },
+          {
+            "label": "Auto",
+            "value": "fieldGroup",
+            "barIcon": "Group",
+            "barTitle": "Field Group"
+          },
+          {
+            "label": "Above",
+            "value": "above",
+            "barIcon": "MarginTop",
+            "barTitle": "Above"
+          },
+          {
+            "label": "Left",
+            "value": "left",
+            "barIcon": "MarginLeft",
+            "barTitle": "Left"
+          }
+        ]
+      },
+      {
+        "tag": "style",
         "type": "select",
         "label": "Layout",
         "key": "span",
@@ -129,10 +184,10 @@
         "barStyle": "buttons",
         "options": [
           {
-            "label": "1 column",
-            "value": 6,
-            "barIcon": "Stop",
-            "barTitle": "1 column"
+            "label": "3 columns",
+            "value": 2,
+            "barIcon": "ViewColumn",
+            "barTitle": "3 columns"
           },
           {
             "label": "2 columns",
@@ -141,12 +196,25 @@
             "barTitle": "2 columns"
           },
           {
-            "label": "3 columns",
-            "value": 2,
-            "barIcon": "ViewColumn",
-            "barTitle": "3 columns"
+            "label": "1 column",
+            "value": 6,
+            "barIcon": "Stop",
+            "barTitle": "1 column"
+          },
+          {
+            "label": "Full Width",
+            "value": 12,
+            "barIcon": "Maximize",
+            "barTitle": "Full Width"
           }
         ]
+      },
+      {
+        "tag": "style",
+        "type": "boolean",
+        "key": "showDirty",
+        "label": "Show Dirty",
+        "defaultValue": false
       }
     ]
   }
