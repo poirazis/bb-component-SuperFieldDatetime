@@ -6,13 +6,29 @@
     "friendlyName": "Super Field - Datetime",
     "description": "A Datetime Input Field component for Budibase",
     "icon": "Calendar",
-    "requiredAncestors": ["form"],
+    "context": [
+      {
+        "type": "static",
+        "scope": "global",
+        "values": [
+          {
+            "key": "value",
+            "label": "value",
+            "type": "datetime"
+          },
+          {
+            "key": "formattedValue",
+            "label": "formattedValue",
+            "type": "string"
+          }
+        ]
+      }
+    ],
     "settings": [
       {
         "type": "field/datetime",
         "label": "Field",
-        "key": "field",
-        "required": true
+        "key": "field"
       },
       {
         "type": "text",
@@ -34,7 +50,6 @@
         "type": "text",
         "label": "Formatted value",
         "key": "template",
-        "placeholder": "{{ Value }}",
         "supportsConditions": false,
         "nested": true
       },
@@ -51,13 +66,7 @@
       {
         "type": "event",
         "label": "On change",
-        "key": "onChange",
-        "context": [
-          {
-            "label": "Value",
-            "key": "value"
-          }
-        ]
+        "key": "onChange"
       },
       {
         "type": "select",

@@ -2,9 +2,12 @@
   import { getContext, onDestroy } from "svelte";
   import CellDatetime from "../../bb_super_components_shared/src/lib/SuperTableCells/CellDatetime.svelte";
   import SuperButton from "../../bb_super_components_shared/src/lib/SuperButton/SuperButton.svelte";
+  import SuperFieldLabel from "../../bb_super_components_shared/src/lib/SuperFieldLabel/SuperFieldLabel.svelte";
   import "../../bb_super_components_shared/src/lib/SuperFieldsCommon.css";
+  import "../../bb_super_components_shared/src/lib/SuperTableCells/CellCommon.css";
 
-  const { styleable, enrichButtonActions } = getContext("sdk");
+  const { styleable, enrichButtonActions, Provider, processStringSync } =
+    getContext("sdk");
   const component = getContext("component");
   const allContext = getContext("context");
 
@@ -17,12 +20,10 @@
   const formApi = formContext?.formApi;
 
   export let field;
-  export let controlType;
+  export let helpText;
   export let role = "formInpur";
 
-  export let customButtons;
   export let buttons = [];
-  export let buttonsQuiet;
 
   export let label;
   export let span = 6;
@@ -32,6 +33,7 @@
   export let readonly;
   export let validation;
   export let template;
+  export let controlType;
 
   export let icon;
   export let labelPosition = "fieldGroup";
@@ -44,20 +46,20 @@
   let fieldApi;
   let fieldSchema;
   let value;
-  let cellState;
 
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
-  $: labelPos =
-    groupLabelPosition && labelPosition == "fieldGroup"
+  $: labelPos = label
+    ? groupLabelPosition && labelPosition == "fieldGroup"
       ? groupLabelPosition
-      : labelPosition;
+      : labelPosition
+    : false;
 
   $: formField = formApi?.registerField(
     field,
     "datetime",
     defaultValue,
-    disabled,
-    readonly,
+    disabled || groupDisabled,
+    readonly || groupDisabled,
     validation,
     formStep
   );
@@ -73,12 +75,12 @@
   $: cellOptions = {
     placeholder,
     defaultValue,
-    disabled,
-    template,
     padding: "0.5rem",
-    readonly: readonly || disabled,
+    disabled: disabled || groupDisabled || fieldState?.disabled,
+    template,
+    readonly: readonly || fieldState?.readonly,
     icon,
-    error: fieldState.error,
+    error: fieldState?.error,
     role,
     showDirty,
   };
@@ -87,12 +89,7 @@
     ...$component.styles,
     normal: {
       ...$component.styles.normal,
-      "flex-direction": labelPos == "left" ? "row" : "column",
-      "align-items": "stretch",
-      gap: labelPos == "left" ? "0.5rem" : "0rem",
       "grid-column": span < 7 ? "span " + span : "span " + groupColumns * 6,
-      "--label-width":
-        labelPos == "left" ? (labelWidth ? labelWidth : "6rem") : "auto",
     },
   };
 
@@ -104,46 +101,52 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<div class="superField" use:styleable={$component.styles}>
-  {#if label && labelPos}
-    <label for="superCell" class="superlabel" class:left={labelPos == "left"}>
+<div use:styleable={$component.styles}>
+  <Provider
+    data={{
+      value,
+      formattedValue: processStringSync(template ?? "", $allContext),
+    }}
+  />
+  <div
+    class="superField"
+    class:left-label={labelPos == "left"}
+    class:multirow={controlType != "select"}
+  >
+    <SuperFieldLabel
+      {labelPos}
+      {labelWidth}
       {label}
-      {#if fieldState.error}
-        <div class="error" class:left={labelPos == "left"}>
-          <span>{fieldState.error}</span>
-        </div>
-      {/if}
-    </label>
-  {/if}
-
-  <div class="inline-cells">
-    <CellDatetime
-      bind:cellState
-      {cellOptions}
-      value={fieldState.value}
-      {fieldSchema}
-      {autofocus}
-      on:change={(e) => fieldApi?.setValue(e.detail)}
-      on:blur={cellState.lostFocus}
+      {helpText}
+      error={fieldState?.error}
     />
 
-    {#if customButtons && buttons?.length}
-      <div
-        class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
-        class:spectrum-ActionGroup--quiet={buttonsQuiet}
-      >
-        {#each buttons as { text, onClick, quiet, disabled, type }}
-          <SuperButton
-            quiet={buttonsQuiet || quiet}
-            {disabled}
-            size="M"
-            {text}
-            onClick={enrichButtonActions(onClick, $allContext)}
-            emphasized
-            selected={type == "cta"}
-          />
-        {/each}
-      </div>
-    {/if}
+    <div class="inline-cells">
+      <CellDatetime
+        {cellOptions}
+        {value}
+        {fieldSchema}
+        {autofocus}
+        on:change={(e) => {
+          value = e.detail;
+          fieldApi?.setValue(e.detail);
+        }}
+      />
+
+      {#if buttons?.length}
+        <div class="inline-buttons">
+          {#each buttons as { text, onClick, quiet, disabled, type, size }}
+            <SuperButton
+              {quiet}
+              {disabled}
+              {size}
+              {type}
+              {text}
+              on:click={enrichButtonActions(onClick, $allContext)({ value })}
+            />
+          {/each}
+        </div>
+      {/if}
+    </div>
   </div>
 </div>
