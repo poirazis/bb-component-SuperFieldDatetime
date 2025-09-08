@@ -1,6 +1,6 @@
 {
   "name": "bb-component-SuperFieldDatetime",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A Datetime Input Field for Budibase",
   "license": "MIT",
   "author": "Michael Poirazi",
