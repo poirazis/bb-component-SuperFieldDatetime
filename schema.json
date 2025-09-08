@@ -6,23 +6,42 @@
     "friendlyName": "Super Field - Datetime",
     "description": "A Datetime Input Field component for Budibase",
     "icon": "Calendar",
-    "requiredAncestors": ["form"],
+    "context": [
+      {
+        "type": "static",
+        "scope": "global",
+        "values": [
+          {
+            "key": "value",
+            "label": "value",
+            "type": "datetime"
+          },
+          {
+            "key": "formattedValue",
+            "label": "formattedValue",
+            "type": "string"
+          }
+        ]
+      }
+    ],
     "settings": [
       {
         "type": "field/datetime",
         "label": "Field",
         "key": "field",
-        "required": true
+        "defaultValue": "Date Field"
       },
       {
         "type": "text",
         "label": "Label",
-        "key": "label"
+        "key": "label",
+        "placeholder": "Field Name"
       },
       {
         "type": "text",
         "label": "Placeholder",
-        "key": "placeholder"
+        "key": "placeholder",
+        "placeholder": "Field Name"
       },
       {
         "type": "text",
@@ -32,9 +51,8 @@
       },
       {
         "type": "text",
-        "label": "Formatted value",
+        "label": "Format value",
         "key": "template",
-        "placeholder": "{{ Value }}",
         "supportsConditions": false,
         "nested": true
       },
@@ -51,76 +69,78 @@
       {
         "type": "event",
         "label": "On change",
-        "key": "onChange",
-        "context": [
+        "key": "onChange"
+      },
+      {
+        "type": "select",
+        "key": "controlType",
+        "label": "Control Type",
+        "defaultValue": "datetime",
+        "options": [
           {
-            "label": "Value",
-            "key": "value"
+            "label": "Datetime",
+            "value": "datetime"
+          },
+          {
+            "label": "Date Range",
+            "value": "range"
           }
         ]
       },
       {
         "type": "select",
-        "label": "Type",
-        "key": "controlType",
-        "defaultValue": "select",
-        "placeholder": "Pick an options type",
+        "label": "Date Format",
+        "key": "dateFormat",
+        "defaultValue": "default",
+        "placeholder": "Select date format",
         "options": [
           {
-            "label": "Select",
-            "value": "select"
+            "label": "Default (Browser format)",
+            "value": "default"
           },
           {
-            "label": "Expanded",
-            "value": "expanded"
+            "label": "MM/DD/YYYY (American)",
+            "value": "MM/DD/YYYY"
+          },
+          {
+            "label": "DD/MM/YYYY (European)",
+            "value": "DD/MM/YYYY"
+          },
+          {
+            "label": "YYYY-MM-DD (ISO)",
+            "value": "YYYY-MM-DD"
+          },
+          {
+            "label": "MMM DD, YYYY",
+            "value": "MMM DD, YYYY"
+          },
+          {
+            "label": "DD MMM YYYY",
+            "value": "DD MMM YYYY"
           }
         ]
       },
       {
         "type": "boolean",
-        "label": "Grab Focus",
-        "key": "autofocus",
+        "label": "Show Time",
+        "key": "showTime"
+      },
+      {
+        "type": "boolean",
+        "key": "invisible",
+        "label": "Invisible",
         "defaultValue": false
-      },
-      {
-        "type": "boolean",
-        "label": "Disabled",
-        "key": "disabled",
-        "defaultValue": false
-      },
-      {
-        "type": "boolean",
-        "label": "Read only",
-        "key": "readonly",
-        "defaultValue": false,
-        "dependsOn": {
-          "setting": "disabled",
-          "value": true,
-          "invert": true
-        }
-      },
-      {
-        "type": "boolean",
-        "key": "showIcon",
-        "label": "Add Inline Icon"
       },
       {
         "type": "icon",
         "key": "icon",
-        "label": "Icon",
-        "resetOn": "showIcon",
-        "dependsOn": "showIcon"
+        "label": "Icon"
       },
-      {
-        "type": "boolean",
-        "key": "customButtons",
-        "label": "Add Buttons"
-      },
+
       {
         "type": "buttonConfiguration",
         "key": "buttons",
-        "nested": true,
-        "dependsOn": "customButtons"
+        "nested": true
       },
       {
         "tag": "style",
@@ -176,38 +196,11 @@
       },
       {
         "tag": "style",
-        "type": "select",
-        "label": "Layout",
+        "type": "number",
+        "label": "Size",
         "key": "span",
         "defaultValue": 6,
-        "showInBar": true,
-        "barStyle": "buttons",
-        "options": [
-          {
-            "label": "3 columns",
-            "value": 2,
-            "barIcon": "ViewColumn",
-            "barTitle": "3 columns"
-          },
-          {
-            "label": "2 columns",
-            "value": 3,
-            "barIcon": "ColumnTwoA",
-            "barTitle": "2 columns"
-          },
-          {
-            "label": "1 column",
-            "value": 6,
-            "barIcon": "Stop",
-            "barTitle": "1 column"
-          },
-          {
-            "label": "Full Width",
-            "value": 12,
-            "barIcon": "Maximize",
-            "barTitle": "Full Width"
-          }
-        ]
+        "min": 2
       },
       {
         "tag": "style",

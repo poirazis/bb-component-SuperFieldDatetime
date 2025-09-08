@@ -1,10 +1,19 @@
 <script>
   import { getContext, onDestroy } from "svelte";
-  import CellDatetime from "../../bb_super_components_shared/src/lib/SuperTableCells/CellDatetime.svelte";
-  import SuperButton from "../../bb_super_components_shared/src/lib/SuperButton/SuperButton.svelte";
-  import "../../bb_super_components_shared/src/lib/SuperFieldsCommon.css";
+  import {
+    SuperButton,
+    SuperField,
+    CellDatetime,
+    CellDateRange,
+  } from "@poirazis/supercomponents-shared";
 
-  const { styleable, enrichButtonActions } = getContext("sdk");
+  const {
+    styleable,
+    enrichButtonActions,
+    Provider,
+    processStringSync,
+    builderStore,
+  } = getContext("sdk");
   const component = getContext("component");
   const allContext = getContext("context");
 
@@ -16,13 +25,11 @@
   const groupDisabled = getContext("field-group-disabled");
   const formApi = formContext?.formApi;
 
-  export let field;
-  export let controlType;
+  export let field = "Date Field";
+  export let helpText;
   export let role = "formInpur";
 
-  export let customButtons;
   export let buttons = [];
-  export let buttonsQuiet;
 
   export let label;
   export let span = 6;
@@ -32,11 +39,15 @@
   export let readonly;
   export let validation;
   export let template;
+  export let controlType = "datetime"; // datetime | range
 
   export let icon;
   export let labelPosition = "fieldGroup";
   export let showDirty;
   export let autofocus;
+  export let showTime;
+  export let dateFormat = "default";
+  export let invisible = false;
 
   let formField;
   let formStep;
@@ -44,7 +55,6 @@
   let fieldApi;
   let fieldSchema;
   let value;
-  let cellState;
 
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
   $: labelPos =
@@ -56,8 +66,8 @@
     field,
     "datetime",
     defaultValue,
-    disabled,
-    readonly,
+    disabled || groupDisabled,
+    readonly || groupDisabled,
     validation,
     formStep
   );
@@ -69,30 +79,33 @@
   });
 
   $: value = fieldState?.value ? fieldState.value : defaultValue;
+  $: error = fieldState?.error;
 
   $: cellOptions = {
-    placeholder,
+    placeholder: placeholder ?? field,
     defaultValue,
-    disabled,
-    template,
     padding: "0.5rem",
-    readonly: readonly || disabled,
+    disabled: disabled || groupDisabled || fieldState?.disabled,
+    template,
+    readonly: readonly || fieldState?.readonly,
     icon,
-    error: fieldState.error,
+    error: fieldState?.error,
     role,
     showDirty,
+    showTime,
+    dateFormat,
   };
 
   $: $component.styles = {
     ...$component.styles,
     normal: {
       ...$component.styles.normal,
-      "flex-direction": labelPos == "left" ? "row" : "column",
-      "align-items": "stretch",
-      gap: labelPos == "left" ? "0.5rem" : "0rem",
-      "grid-column": span < 7 ? "span " + span : "span " + groupColumns * 6,
-      "--label-width":
-        labelPos == "left" ? (labelWidth ? labelWidth : "6rem") : "auto",
+      display:
+        invisible && !$builderStore.inBuilder
+          ? "none"
+          : $component.styles.normal.display,
+      opacity: invisible && $builderStore.inBuilder ? 0.6 : 1,
+      "grid-column": groupColumns ? `span ${span}` : "span 1",
     },
   };
 
@@ -104,46 +117,51 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<div class="superField" use:styleable={$component.styles}>
-  {#if label && labelPos}
-    <label for="superCell" class="superlabel" class:left={labelPos == "left"}>
-      {label}
-      {#if fieldState.error}
-        <div class="error" class:left={labelPos == "left"}>
-          <span>{fieldState.error}</span>
-        </div>
-      {/if}
-    </label>
-  {/if}
+<div use:styleable={$component.styles}>
+  <Provider
+    data={{
+      value,
+      formattedValue: processStringSync(template ?? "", $allContext),
+    }}
+  />
+  <SuperField {labelPos} {labelWidth} {field} {label} {error} {helpText}>
+    {#if controlType != "range"}
+      <CellDatetime
+        {cellOptions}
+        {value}
+        {fieldSchema}
+        {autofocus}
+        on:change={(e) => {
+          value = e.detail;
+          fieldApi?.setValue(e.detail);
+        }}
+      />
+    {:else}
+      <CellDateRange
+        {cellOptions}
+        {value}
+        {fieldSchema}
+        {autofocus}
+        on:change={(e) => {
+          value = e.detail;
+          fieldApi?.setValue(e.detail);
+        }}
+      />
+    {/if}
 
-  <div class="inline-cells">
-    <CellDatetime
-      bind:cellState
-      {cellOptions}
-      value={fieldState.value}
-      {fieldSchema}
-      {autofocus}
-      on:change={(e) => fieldApi?.setValue(e.detail)}
-      on:blur={cellState.lostFocus}
-    />
-
-    {#if customButtons && buttons?.length}
-      <div
-        class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
-        class:spectrum-ActionGroup--quiet={buttonsQuiet}
-      >
-        {#each buttons as { text, onClick, quiet, disabled, type }}
+    {#if buttons?.length}
+      <div class="inline-buttons">
+        {#each buttons as { text, onClick, quiet, disabled, type, size }}
           <SuperButton
-            quiet={buttonsQuiet || quiet}
+            {quiet}
             {disabled}
-            size="M"
+            {size}
+            {type}
             {text}
-            onClick={enrichButtonActions(onClick, $allContext)}
-            emphasized
-            selected={type == "cta"}
+            on:click={enrichButtonActions(onClick, $allContext)({ value })}
           />
         {/each}
       </div>
     {/if}
-  </div>
+  </SuperField>
 </div>
