@@ -1,13 +1,19 @@
 <script>
   import { getContext, onDestroy } from "svelte";
-  import CellDatetime from "../../bb_super_components_shared/src/lib/SuperTableCells/CellDatetime.svelte";
-  import SuperButton from "../../bb_super_components_shared/src/lib/SuperButton/SuperButton.svelte";
-  import SuperFieldLabel from "../../bb_super_components_shared/src/lib/SuperFieldLabel/SuperFieldLabel.svelte";
-  import "../../bb_super_components_shared/src/lib/SuperFieldsCommon.css";
-  import "../../bb_super_components_shared/src/lib/SuperTableCells/CellCommon.css";
+  import {
+    SuperButton,
+    SuperField,
+    CellDatetime,
+    CellDateRange,
+  } from "@poirazis/supercomponents-shared";
 
-  const { styleable, enrichButtonActions, Provider, processStringSync } =
-    getContext("sdk");
+  const {
+    styleable,
+    enrichButtonActions,
+    Provider,
+    processStringSync,
+    builderStore,
+  } = getContext("sdk");
   const component = getContext("component");
   const allContext = getContext("context");
 
@@ -19,7 +25,7 @@
   const groupDisabled = getContext("field-group-disabled");
   const formApi = formContext?.formApi;
 
-  export let field;
+  export let field = "Date Field";
   export let helpText;
   export let role = "formInpur";
 
@@ -33,12 +39,15 @@
   export let readonly;
   export let validation;
   export let template;
-  export let controlType;
+  export let controlType = "datetime"; // datetime | range
 
   export let icon;
   export let labelPosition = "fieldGroup";
   export let showDirty;
   export let autofocus;
+  export let showTime;
+  export let dateFormat = "default";
+  export let invisible = false;
 
   let formField;
   let formStep;
@@ -48,11 +57,10 @@
   let value;
 
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
-  $: labelPos = label
-    ? groupLabelPosition && labelPosition == "fieldGroup"
+  $: labelPos =
+    groupLabelPosition && labelPosition == "fieldGroup"
       ? groupLabelPosition
-      : labelPosition
-    : false;
+      : labelPosition;
 
   $: formField = formApi?.registerField(
     field,
@@ -71,9 +79,10 @@
   });
 
   $: value = fieldState?.value ? fieldState.value : defaultValue;
+  $: error = fieldState?.error;
 
   $: cellOptions = {
-    placeholder,
+    placeholder: placeholder ?? field,
     defaultValue,
     padding: "0.5rem",
     disabled: disabled || groupDisabled || fieldState?.disabled,
@@ -83,13 +92,20 @@
     error: fieldState?.error,
     role,
     showDirty,
+    showTime,
+    dateFormat,
   };
 
   $: $component.styles = {
     ...$component.styles,
     normal: {
       ...$component.styles.normal,
-      "grid-column": span < 7 ? "span " + span : "span " + groupColumns * 6,
+      display:
+        invisible && !$builderStore.inBuilder
+          ? "none"
+          : $component.styles.normal.display,
+      opacity: invisible && $builderStore.inBuilder ? 0.6 : 1,
+      "grid-column": groupColumns ? `span ${span}` : "span 1",
     },
   };
 
@@ -108,20 +124,8 @@
       formattedValue: processStringSync(template ?? "", $allContext),
     }}
   />
-  <div
-    class="superField"
-    class:left-label={labelPos == "left"}
-    class:multirow={controlType != "select"}
-  >
-    <SuperFieldLabel
-      {labelPos}
-      {labelWidth}
-      {label}
-      {helpText}
-      error={fieldState?.error}
-    />
-
-    <div class="inline-cells">
+  <SuperField {labelPos} {labelWidth} {field} {label} {error} {helpText}>
+    {#if controlType != "range"}
       <CellDatetime
         {cellOptions}
         {value}
@@ -132,21 +136,32 @@
           fieldApi?.setValue(e.detail);
         }}
       />
+    {:else}
+      <CellDateRange
+        {cellOptions}
+        {value}
+        {fieldSchema}
+        {autofocus}
+        on:change={(e) => {
+          value = e.detail;
+          fieldApi?.setValue(e.detail);
+        }}
+      />
+    {/if}
 
-      {#if buttons?.length}
-        <div class="inline-buttons">
-          {#each buttons as { text, onClick, quiet, disabled, type, size }}
-            <SuperButton
-              {quiet}
-              {disabled}
-              {size}
-              {type}
-              {text}
-              on:click={enrichButtonActions(onClick, $allContext)({ value })}
-            />
-          {/each}
-        </div>
-      {/if}
-    </div>
-  </div>
+    {#if buttons?.length}
+      <div class="inline-buttons">
+        {#each buttons as { text, onClick, quiet, disabled, type, size }}
+          <SuperButton
+            {quiet}
+            {disabled}
+            {size}
+            {type}
+            {text}
+            on:click={enrichButtonActions(onClick, $allContext)({ value })}
+          />
+        {/each}
+      </div>
+    {/if}
+  </SuperField>
 </div>
