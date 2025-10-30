@@ -106,6 +106,7 @@
           : $component.styles.normal.display,
       opacity: invisible && $builderStore.inBuilder ? 0.6 : 1,
       "grid-column": groupColumns ? `span ${span}` : "span 1",
+      overflow: "hidden",
     },
   };
 
