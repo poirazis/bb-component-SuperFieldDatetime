@@ -58,7 +58,7 @@
 
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
   $: labelPos =
-    groupLabelPosition && labelPosition == "fieldGroup"
+    groupLabelPosition !== undefined && labelPosition == "fieldGroup"
       ? groupLabelPosition
       : labelPosition;
 
@@ -88,7 +88,7 @@
     disabled: disabled || groupDisabled || fieldState?.disabled,
     template,
     readonly: readonly || fieldState?.readonly,
-    icon,
+    icon: icon ? "ph ph-" + icon : undefined,
     error: fieldState?.error,
     role,
     showDirty,
@@ -152,14 +152,18 @@
 
     {#if buttons?.length}
       <div class="inline-buttons">
-        {#each buttons as { text, onClick, quiet, disabled, type, size }}
+        {#each buttons as { icon, onClick, ...rest }}
           <SuperButton
-            {quiet}
-            {disabled}
-            {size}
-            {type}
-            {text}
-            onClick={enrichButtonActions(onClick, $allContext)({ value })}
+            {...rest}
+            icon={"ph ph-" + icon}
+            disabled={processStringSync(
+              rest.disabledTemplate ?? "",
+              $allContext
+            ) === true ||
+              disabled ||
+              groupDisabled ||
+              fieldState?.disabled}
+            onClick={enrichButtonActions(onClick, $allContext)}
           />
         {/each}
       </div>
