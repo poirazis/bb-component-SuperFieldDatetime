@@ -1,6 +1,8 @@
 {
   "type": "component",
-  "metadata": {},
+  "metadata": {
+    "svelteMajor": 5
+  },
   "schema": {
     "name": "bb-component-SuperFieldDatetime",
     "friendlyName": "Super Field - Datetime",
@@ -130,7 +132,6 @@
         "key": "icon",
         "label": "Icon"
       },
-
       {
         "type": "componentConfiguration",
         "componentType": "plugin/bb-component-SuperButton",
